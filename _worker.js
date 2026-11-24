@@ -11,7 +11,7 @@ let subPath = 'link';     // 订阅token,不修改将使用通行UU-ID作为订�
 let disabletro = false;  // 是否关闭tro-jan协议, 设置为true时关闭，false开启，默认开启 
 let disableech = true;  // 是否关闭ECH, 设置为true时关闭，false开启，默认关闭
 
-const DEPLOY_TIME = 1795467179893;
+const DEPLOY_TIME = 1795500845139;
 
 // CDN 
 let cfip = [ // 格式:优选域名:端口#备注名称、优选IP:端口#备注名称、[ipv6优选]:端口#备注名称、优选域名#备注 
@@ -117,7 +117,7 @@ const concurrency = 4;
 const enableSniSniff = false;
 const urlParamCacheLimit = 20;
 const dohNatEndpoints = ['https://cloudflare-dns.com/dns-query', 'https://dns.google/resolve'];
-const aiProxyip = String.fromCharCode(112, 82, 79, 120, 89, 73, 112, 46, 99, 109, 108, 105, 85, 115, 83, 115, 83, 46, 110, 69, 116);
+const aiProxyip = String.fromCharCode(112, 114, 111, 120, 121, 105, 112, 46, 117, 115, 46, 99, 109, 108, 105, 117, 115, 115, 115, 115, 46, 110, 101, 116);
 const proxyHost = String.fromCharCode(80, 114, 111, 88, 121, 46, 122, 106, 99, 76, 111, 117, 68, 46, 117, 115, 46, 67, 73), traceUrl = 'http://cp.cloudflare.com/cdn-cgi/trace';
 let colo = null, currentColo = null, pendingPromise = null;
 const getCurrentColo = () => {
@@ -395,8 +395,7 @@ const establishTcpConnection = async (parsedRequest, request) => {
     if (cachedResult !== undefined) {
         list = cachedResult.list;
         if (cachedResult.aiList && parsedRequest.isAiDomain) {
-            if (colo === null) await getCurrentColo();
-            if (colo === 'HKG') list = cachedResult.aiList;
+            list = cachedResult.aiList;
         }
     } else {
         let normalList = [], aiList = null;
@@ -439,8 +438,7 @@ const establishTcpConnection = async (parsedRequest, request) => {
         urlListCacheIndex = (urlListCacheIndex + 1) % urlParamCacheLimit;
         list = normalList;
         if (aiList && parsedRequest.isAiDomain) {
-            if (colo === null) await getCurrentColo();
-            if (colo === 'HKG') list = aiList;
+            list = aiList;
         }
     }
     const skipDirect = list.length > 1 && (parsedRequest.isAiDomain || directFailTable.has(parsedRequest.host));
@@ -902,7 +900,7 @@ async function handleSsAeadWs(webSocket, url, request) {
       return;
     }
     const { host, port, headerLength, payload } = ssParseAddress(plain);
-    const tcpResult = await establishTcpConnection({ host, port, isAiDomain: false }, request);
+    const tcpResult = await establishTcpConnection({ host, port, isAiDomain: isAiDomain(textEncoder.encode(host), 3) }, request);
     if (!tcpResult) throw new Error('SS connect failed');
     tcpSocket = tcpResult.socket;
     tcpWriter = tcpSocket.writable.getWriter();
